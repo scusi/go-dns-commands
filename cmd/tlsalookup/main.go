@@ -1,5 +1,5 @@
-// a dump tool that resolves dns A records
-// USAGE: lookup github.com
+// tlsalookup - takes a hostname and looks up the TLSA record for port 443 tcp
+// USAGE: tlsalookup 0x41414141.de
 //
 package main
 
