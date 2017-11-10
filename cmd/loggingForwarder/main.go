@@ -1,3 +1,4 @@
+// logging dns fowarder
 package main
 
 import (
