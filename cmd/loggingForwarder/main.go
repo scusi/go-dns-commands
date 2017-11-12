@@ -1,11 +1,24 @@
-// logging dns fowarder
+// a logging dns fowarder
+//
+// starts a dns server and forwards all queries to an upstream dns server.
+// answers from the upstream server are replyed back to the client.
+//
 package main
 
 import (
+	"flag"
 	"github.com/miekg/dns"
 	"log"
-	"strconv"
+	//"strconv"
 )
+
+var upstreamDNS string
+var listeningPort string
+
+func init() {
+	flag.StringVar(&upstreamDNS, "upstream", "8.8.8.8:53", "upstream DNS to forward requets to")
+	flag.StringVar(&listeningPort, "port", "5301", "port the forwarder should listen for dns requests")
+}
 
 // handleDNSRequest - sends queries to upstream servers and response back to client.
 func handleDnsRequest(w dns.ResponseWriter, r *dns.Msg) {
@@ -19,7 +32,7 @@ func handleDnsRequest(w dns.ResponseWriter, r *dns.Msg) {
 	// forward to upstream dns and write answer back to client
 	case dns.OpcodeQuery:
 		c := new(dns.Client)
-		in, _, err := c.Exchange(r, "127.0.0.1:53")
+		in, _, err := c.Exchange(r, upstreamDNS)
 		if err != nil {
 			log.Printf("%s", err.Error())
 		}
@@ -35,13 +48,14 @@ func handleDnsRequest(w dns.ResponseWriter, r *dns.Msg) {
 }
 
 func main() {
+	flag.Parse()
 	// attach request handler func
 	dns.HandleFunc(".", handleDnsRequest)
 
 	// start server
-	port := 5301
-	server := &dns.Server{Addr: ":" + strconv.Itoa(port), Net: "udp"}
-	log.Printf("Starting at %d\n", port)
+	//port := 5301
+	server := &dns.Server{Addr: ":" + listeningPort, Net: "udp"}
+	log.Printf("Starting at %d\n", listeningPort)
 	err := server.ListenAndServe()
 	defer server.Shutdown()
 	if err != nil {
