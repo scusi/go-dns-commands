@@ -13,11 +13,11 @@ import (
 )
 
 var upstreamDNS string
-var listeningPort string
+var listenAddr string
 
 func init() {
 	flag.StringVar(&upstreamDNS, "upstream", "8.8.8.8:53", "upstream DNS to forward requets to")
-	flag.StringVar(&listeningPort, "port", "5301", "port the forwarder should listen for dns requests")
+	flag.StringVar(&listenAddr, "addr", "127.0.0.1:5301", "port the forwarder should listen for dns requests")
 }
 
 // handleDNSRequest - sends queries to upstream servers and response back to client.
@@ -54,8 +54,8 @@ func main() {
 
 	// start server
 	//port := 5301
-	server := &dns.Server{Addr: ":" + listeningPort, Net: "udp"}
-	log.Printf("Starting at %d\n", listeningPort)
+	server := &dns.Server{Addr: listenAddr, Net: "udp"}
+	log.Printf("Starting at %d\n", listenAddr)
 	err := server.ListenAndServe()
 	defer server.Shutdown()
 	if err != nil {
